@@ -47,7 +47,6 @@ class CommentViewSet(viewsets.ModelViewSet):
 class FollowViewSet(mixins.CreateModelMixin,
                     mixins.ListModelMixin,
                     viewsets.GenericViewSet):
-    queryset = Follow.objects.all()
     serializer_class = FollowSerializer
     pagination_class = pagination.LimitOffsetPagination
     permission_classes = (permissions.IsAuthenticated,)
@@ -55,9 +54,8 @@ class FollowViewSet(mixins.CreateModelMixin,
     search_fields = ('following__username', 'user__username',)
 
     def get_queryset(self):
-        """Возвращает все подписки пользователя, сделавшего запрос"""
-        new_queryset = Follow.objects.filter(user=self.request.user)
-        return new_queryset
+        user = get_object_or_404(User, username=self.request.user.username)
+        return user.follower
 
     def perform_create(self, serializer):
         return serializer.save(user=self.request.user)
